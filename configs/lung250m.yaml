@@ -1,0 +1,36 @@
+dataset:
+  name: "Lung250M-4B"
+  citation: "Falta et al., NeurIPS 2023 Datasets and Benchmarks Track"
+  data_dir: "data/lung250m"
+  splits_file: "data/splits/lung250m_splits.json"
+  format: "mhd/nii.gz"
+  target_classes: 2 # 0: Artery, 1: Vein
+  node_count: 8192
+  knn_k: 10
+  feature_dim: 602 # 584 baseline + 18 optimal features
+  max_hops: 3
+  paired_respiration: true # Patient pairs: _1 (inspiration) and _2 (expiration)
+
+training:
+  model: "enhanced_hgat"
+  device: "cuda:0"
+  epochs: 50
+  batch_size: 4
+  lr: 0.001
+  weight_decay: 0.00001
+  scheduler: "cosine"
+  eta_min: 0.00001
+  grad_clip: 1.0
+
+loss:
+  gamma: 2.0
+  lambda_seed: 0.05
+  lambda_cldice: 0.10
+  lambda_thick: 0.05
+  lambda_fpr: 0.05
+
+evaluation:
+  metrics: ["accuracy", "precision", "recall", "specificity", "dice", "miou", "hd95"]
+  clinical_biomarkers: ["bv5", "avr"]
+  decision_threshold: 0.45
+

@@ -1,0 +1,40 @@
+dataset:
+  name: "HiPaS 2025"
+  citation: "Chu et al., Nat Commun 16, 2262 (2025)"
+  data_dir: "data/hipas"
+  splits_file: "data/splits/hipas_splits.json"
+  format: "npz"
+  metadata_file: "data/hipas/metadata.xlsx"
+  target_classes: 2 # 0: Artery, 1: Vein
+  node_count: 8192
+  knn_k: 10
+  feature_dim: 602 # 584 baseline + 18 optimal features
+  max_hops: 3
+  hard_negative_mining:
+    enabled: true
+    foreground_ratio: 0.60
+    soft_tissue_ratio: 0.25
+    parenchyma_ratio: 0.15
+
+training:
+  model: "enhanced_hgat"
+  device: "cuda:0"
+  epochs: 50
+  batch_size: 4
+  lr: 0.001
+  weight_decay: 0.00001
+  scheduler: "cosine"
+  eta_min: 0.00001
+  grad_clip: 1.0
+
+loss:
+  gamma: 2.0
+  lambda_seed: 0.05
+  lambda_cldice: 0.10
+  lambda_thick: 0.05
+  lambda_fpr: 0.05
+
+evaluation:
+  metrics: ["accuracy", "precision", "recall", "specificity", "dice", "miou", "hd95"]
+  decision_threshold: 0.45
+

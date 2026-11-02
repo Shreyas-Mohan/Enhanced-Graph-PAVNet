@@ -1,0 +1,175 @@
+# Enhanced Graph-PAVNet: Pulmonary Artery-Vein Separation on Thoracic CT
+
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.1+-ee4c2c.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![PyG](https://img.shields.io/badge/PyG-2.4+-3C2179.svg?logo=pyg&logoColor=white)](https://pyg.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![CUDA](https://img.shields.io/badge/CUDA-11.8%20%7C%2012.1-green.svg)](https://developer.nvidia.com/cuda-toolkit)
+
+Official research repository for **Enhanced Graph-PAVNet**, an advanced topological and multimodal graph learning framework for automated pulmonary artery-vein separation on 3D non-contrast thoracic CT.
+
+---
+
+## 📌 Background: Building Upon Graph-PAVNet
+
+Our work takes the foundational **Graph-PAVNet** framework ([Li et al., Northeastern University](https://github.com/Lqy1018/Graph-PAVNet)) as its architectural starting point. Graph-PAVNet reformulated pulmonary artery-vein separation from fragile voxel-level segmentation into node classification over a 3D vascular landmark skeleton graph (8,192 nodes) with 584-dimensional features (8d physical coordinates/directions + 576d multi-planar Vision Transformer patch tokens) and hierarchical inter-layer graph attention (HGAT).
+
+### Limitations of Baseline Graph-PAVNet
+While Graph-PAVNet addressed structural fragmentation present in traditional CNNs, critical failure modes remain:
+1. **Distal Feature Degradation**: The 576-dim visual ViT patch tokens degrade in small peripheral vessels ($r \le 1.5$ mm / BV5 biomarker), where CT partial volume effects and low contrast dominate.
+2. **Naive Feature Concatenation**: Graph-PAVNet concatenates raw coordinates and ViT visual features directly without adaptive cross-modal weighting.
+3. **Artery-Vein Crossover Confusion**: In crowded lobar planes where parallel companion artery-vein bundles travel side-by-side, basic node-level cross-entropy loss produces frequent false label switching.
+
+---
+
+## 🔬 Our Proposed Extensions: Enhanced HGAT
+
+To resolve these bottlenecks, we introduce three core technical enhancements:
+
+```
+                               ┌──────────────────────────────────────────────────────────┐
+                               │                    Raw Input Node Features               │
+                               │  - Visual ViT Stream (576d)                              │
+                               │  - Radiomic Textures (9d: LoG vesselness, HU gradients)  │
+                               │  - Geometric Morphometry (17d: coords, caliber, Murray)  │
+                               └────────────────────────────┬─────────────────────────────┘
+                                                            │
+                               ┌────────────────────────────▼─────────────────────────────┐
+                               │     3-Branch Decoupled Cross-Gating Adapter (256d)       │
+                               │  - Master query: local vascular caliber (r_i)            │
+                               │  - High caliber (trunks)   --> Emphasizes visual ViT     │
+                               │  - Low caliber (periphery) --> Emphasizes geom + radiomics│
+                               └────────────────────────────┬─────────────────────────────┘
+                                                            │
+                               ┌────────────────────────────▼─────────────────────────────┐
+                               │      Hierarchical Graph Attention Backbone (3 Hops)      │
+                               │  - Direction-guided k-NN message passing (k=10)          │
+                               │  - BFS hierarchy hop gating from cardiac hilum seeds     │
+                               └────────────────────────────┬─────────────────────────────┘
+                                                            │
+                               ┌────────────────────────────▼─────────────────────────────┐
+                               │                     Dual Output Heads                    │
+                               │  1. Primary Classifier Head: Log-Softmax PA / PV Logits  │
+                               │  2. Auxiliary Caliber Head: Continuous Diameter Radius r │
+                               └────────────────────────────┬─────────────────────────────┘
+                                                            │
+                               ┌────────────────────────────▼─────────────────────────────┐
+                               │             Multi-Objective Loss Formulation             │
+                               │  L_total = (1-λ_s)L_focal + λ_s L_seed + λ_cldice L_cldice│
+                               │            + λ_thick L_thick + λ_fpr L_fpr               │
+                               └──────────────────────────────────────────────────────────┘
+```
+
+1. **Domain-Specific Anatomical Feature Extension (584d $\rightarrow$ 602d)**:
+   - Evaluated 20 candidate features and identified the **18 Optimal Descriptors**:
+     - *Vascular Morphometry (7d)*: local caliber radius $r_i$, caliber tapering rate $\tau_i$, relative neighbor caliber $\rho_i$, craniocaudal orientation $\theta_{z,i}$, branching alignment $\delta_i$, distance to hilum $d_{\text{hilum},i}$, and Murray's law cubic residual $\Delta M_i$.
+     - *Multi-Scale Radiomics (8d)*: attenuation HU, local mean/std, 3D Sobel gradients, and 3D multi-scale LoG vesselness ($\sigma=1.0, 2.0, 3.0$).
+     - *High-Impact Literature Descriptors (3d)*: scale-invariant normalized caliber $\tilde{r}_i$ (*MorVess*), topological Gaussian radial decay $G_{\text{topo},i}$ (*Topo-UNet*), and intramural attenuation Z-contrast gradient $Z_{\text{contrast},i}$ (*MorVess*).
+2. **3-Branch Decoupled Cross-Gating Fusion Adapter**:
+   - Decouples input representations into three dedicated semantic projections: Visual ViT (256d), Radiomic Textures (128d), and Geometric Morphometry (128d).
+   - Local caliber serves as the conditioning query: in central trunks, visual features are emphasized; in thin peripheral vessels, geometric tapering and radiomic vesselness are upweighted.
+3. **Multi-Objective Topological & Caliber Loss Formulation**:
+   - **Graph Centerline Continuity Loss ($\mathcal{L}_{\text{cldice}}$)**: Enforces smooth cosine probability continuity across same-class skeleton edges, weighted by local caliber $w_{uv} = \min(r_u, r_v)$ (adapted from Shit et al., CVPR 2021).
+   - **Auxiliary Caliber Regression Head ($\mathcal{L}_{\text{thick}}$)**: Smooth L1 diameter supervision preserves natural proximal-to-distal vascular tapering (adapted from MorVess).
+   - **Artery-Vein FPR Crossover Penalty ($\mathcal{L}_{\text{fpr}}$)**: Suppresses label flipping in parallel companion vascular bundles (adapted from Topo-UNet).
+   - **Radius-Weighted Focal Loss ($\mathcal{L}_{\text{focal}}$)**: Directly prioritizes thin peripheral vessels (BV5 clinical focus).
+
+---
+
+## 📂 Repository Directory Navigator
+
+| Directory / File | Description | Key Modules |
+| :--- | :--- | :--- |
+| [`configs/`](configs/) | Dataset & baseline experiment YAML configurations | [`airrc.yaml`](configs/airrc.yaml), [`hipas.yaml`](configs/hipas.yaml), [`lung250m.yaml`](configs/lung250m.yaml), [`baselines/`](configs/baselines/) |
+| [`data/`](data/) | Dataset specifications, split manifests, and I/O loaders | [`README.md`](data/README.md), [`splits/`](data/splits/), [`loaders/`](data/loaders/) |
+| [`src/models/`](src/models/) | Enhanced HGAT, Graph-PAVNet baseline, PyG & MONAI models | [`enhanced_hgat.py`](src/models/enhanced_hgat.py), [`baseline_hgat.py`](src/models/baseline_hgat.py), [`gnn_baselines.py`](src/models/gnn_baselines.py), [`volumetric_baselines.py`](src/models/volumetric_baselines.py) |
+| [`src/features/`](src/features/) | 18 optimal feature extraction library | [`morphometry.py`](src/features/morphometry.py), [`radiomics.py`](src/features/radiomics.py), [`topology.py`](src/features/topology.py), [`extractor.py`](src/features/extractor.py) |
+| [`src/losses/`](src/losses/) | Multi-objective topological and caliber losses | [`focal_dice.py`](src/losses/focal_dice.py), [`cldice_graph.py`](src/losses/cldice_graph.py), [`multi_task_loss.py`](src/losses/multi_task_loss.py) |
+| [`src/evaluation/`](src/evaluation/) | 7 standardized metrics & COPD clinical imaging biomarkers | [`metrics.py`](src/evaluation/metrics.py), [`biomarkers.py`](src/evaluation/biomarkers.py), [`postprocessing.py`](src/evaluation/postprocessing.py) |
+| [`src/utils/`](src/utils/) | Medial-axis skeletonization, k-NN graph builder, visualizer | [`graph_builder.py`](src/utils/graph_builder.py), [`visualization.py`](src/utils/visualization.py) |
+| [`scripts/`](scripts/) | High-level CLI entry points for GPU training & evaluation | [`train.py`](scripts/train.py), [`evaluate.py`](scripts/evaluate.py), [`extract_features.py`](scripts/extract_features.py), [`run_ablations.py`](scripts/run_ablations.py) |
+| [`checkpoints/`](checkpoints/) | Model weights downloader and instructions | [`README.md`](checkpoints/README.md), [`download_checkpoints.py`](checkpoints/download_checkpoints.py) |
+| [`docs/`](docs/) | Benchmark tables, ablation formulas, high-res prediction grids, and report | [`BENCHMARKS.md`](docs/BENCHMARKS.md), [`ABLATION_DETAILS.md`](docs/ABLATION_DETAILS.md), [`figures/`](docs/figures/), [`reports/`](docs/reports/) |
+
+---
+
+## 📊 Benchmark Highlights
+
+Models are benchmarked across 3 clinical thoracic CT datasets against 8 canonical baselines (Dense 3D U-Net, V-Net, nnU-Net, UNETR, Swin UNETR, Standard GAT, GraphSAGE, and baseline Graph-PAVNet) across all 7 standardized metrics: Accuracy, Precision, Recall, Specificity, Dice (DSC), mIoU, and physical HD95 (mm).
+
+| Dataset | Graph-PAVNet Baseline | Enhanced HGAT (Proposed) | $\Delta$ Dice | HD95 Improvement | Detailed Tables |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **AirRC** *(39 Test Scans)* | 0.7388 | **0.7780** | **+3.92%** | **12.80 $\rightarrow$ 12.05 mm** | [View AirRC Benchmark](docs/BENCHMARKS.md#1-airrc-thoracic-ct-benchmark-held-out-test-split-39-scans) |
+| **HiPaS 2025** *(37 Test Scans)* | 0.7600 | **0.8212** | **+6.12%** | **16.48 $\rightarrow$ 11.74 mm** | [View HiPaS Benchmark](docs/BENCHMARKS.md#2-hipas-2025-thoracic-ct-benchmark-held-out-test-split-37-scans) |
+| **Lung250M-4B** *(30 Test Scans)* | 0.6851 | **0.7373** *(0.7414 Ext.)* | **+5.22%** | **14.19 $\rightarrow$ 13.05 mm** | [View Lung250M Benchmark](docs/BENCHMARKS.md#3-lung250m-4b-thoracic-ct-benchmark-held-out-test-split-30-paired-scans) |
+
+> 📖 **Full Benchmark Reports**: Complete results for all 8 baselines, class-specific breakdowns (PA vs. PV), and respiratory inspiration/expiration dynamics (Case 054) are documented in [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md).  
+> 🧪 **Ablation Studies**: Complete feature mathematical formulations, category-wise ablation steps (584d $\rightarrow$ 592d $\rightarrow$ 599d $\rightarrow$ 604d $\rightarrow$ 602d), and Permutation Feature Importance (PFI) rankings are detailed in [`docs/ABLATION_DETAILS.md`](docs/ABLATION_DETAILS.md).  
+> 📄 **Comprehensive Mentor & Reviewer Report**: A complete, self-contained Word document (.docx) report with embedded native math equations and high-resolution qualitative prediction grids is available at [`docs/reports/Pulmonary_Artery_Vein_Separation_Report.docx`](docs/reports/Pulmonary_Artery_Vein_Separation_Report.docx).
+
+---
+
+## 🖼️ Qualitative Predictions Showcase
+
+### Figure 1: Baseline Architecture Comparison (AirRC Slice 131)
+![AirRC Baselines](docs/figures/grid1_baselines_slice131_case_test15.png)
+*(a) Raw CT, (b) Ground Truth, (c) 3D U-Net, (d) 3D V-Net, (e) 3D nnU-Net, (f) 3D UNETR, (g) 3D Swin UNETR, (h) Standard GraphSAGE, (i) Standard GAT, (j) Baseline Graph-PAVNet, (k) Best-Features HGAT, (l) Enhanced HGAT (Proposed).*
+
+### Figure 2: Feature & Architectural Ablation Progression (AirRC Axial Slice 140)
+![AirRC Ablation](docs/figures/grid2_ablations_slice140_case_test15.png)
+*(a) Raw CT, (b) Ground Truth, (c) Graph-PAVNet (Baseline 584d), (d) + Radiomics (592d), (e) + Vascular Geometry (599d), (f) + Topological (604d), (g) Best-Features HGAT (602d), (h) Enhanced HGAT (Proposed, 602d).*
+
+---
+
+## 🚀 Quickstart
+
+### 1. Environment Setup
+```bash
+git clone https://github.com/pulmonary-vascular-ai/pulmonary-artery-vein-separation.git
+cd pulmonary-artery-vein-separation
+
+conda env create -f environment.yml
+conda activate pulmonary_pav
+pip install -e .
+```
+
+### 2. Checkpoint Downloads
+Fetch pre-trained model weights into `checkpoints/`:
+```bash
+python checkpoints/download_checkpoints.py --all
+```
+
+### 3. GPU Training
+Train Enhanced HGAT for 50 epochs on NVIDIA GPU:
+```bash
+# AirRC
+python scripts/train.py --config configs/airrc.yaml --model enhanced_hgat --epochs 50 --device cuda:0
+
+# HiPaS 2025
+python scripts/train.py --config configs/hipas.yaml --model enhanced_hgat --epochs 50 --device cuda:0
+
+# Lung250M-4B
+python scripts/train.py --config configs/lung250m.yaml --model enhanced_hgat --epochs 50 --device cuda:0
+```
+
+### 4. Benchmark Evaluation
+Evaluate trained checkpoints on held-out test splits across all 7 metrics:
+```bash
+python scripts/evaluate.py --config configs/airrc.yaml --dataset airrc --checkpoint checkpoints/airrc_enhanced_hgat_602.pth
+```
+
+---
+
+## 📚 Publications & Citations
+
+### Foundational Baseline Paper
+- **Graph-PAVNet**: Qingya Li, Ye Yuan, Lu Liu, Nan Bao, Lisheng Xu, Wenjun Tan. *Graph-PAVNet: A Graph-Based Learning Framework for Pulmonary Artery and Vein Separation Using Multimodal Feature Sampling.* Key Research Laboratory of Intelligent Computing of Medical Images, Northeastern University, China. [GitHub Repository](https://github.com/Lqy1018/Graph-PAVNet).
+
+### Benchmark Clinical Datasets
+- **AirRC**: Liu, J., Zhang, Z., Niu, B. et al. *A Custom Annotated Dataset for Segmentation of Pulmonary Veins, Arteries, and Airways.* Scientific Data 12, 1806 (2025). [https://doi.org/10.1038/s41597-025-06074-6](https://doi.org/10.1038/s41597-025-06074-6)
+- **HiPaS 2025**: Chu, Y., Luo, G., Zhou, L. et al. *Deep learning-driven pulmonary artery and vein segmentation reveals demography-associated vasculature anatomical differences.* Nature Communications 16, 2262 (2025). [https://doi.org/10.1038/s41467-025-56505-6](https://doi.org/10.1038/s41467-025-56505-6)
+- **Lung250M-4B**: Falta, F., Großbröhmer, C., Hering, A., Bigalke, A., Heinrich, M. *Lung250M-4B: A Combined 3D Dataset for CT- and Point Cloud-Based Intra-Patient Lung Registration.* Advances in Neural Information Processing Systems 36 (NeurIPS 2023) Datasets and Benchmarks Track. DOI: [10.52202/075280-2392](https://doi.org/10.52202/075280-2392)
+
+---
+
+## 📜 License
+This project is released under the [MIT License](LICENSE).

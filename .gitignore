@@ -1,0 +1,60 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyTorch Checkpoints and Weights (Strictly excluded to maintain repo size)
+*.pth
+*.pt
+*.pwf
+checkpoints/*.pth
+checkpoints/*.pt
+models/*.pth
+models/*.pt
+
+# Large Medical Imaging Files and Caches (Must not be tracked in Git)
+*.nii.gz
+*.nii
+*.mhd
+*.raw
+*.npz
+*.npy
+*.cache
+*.h5
+*.hdf5
+data/airrc/
+data/hipas/
+data/lung250m/
+dataset/clouds*
+dataset/images*
+dataset/seg*
+dataset/masks*
+dataset/features*
+dataset/extended*
+
+# Environments and Package distribution
+.env
+.venv
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Jupyter and IDE configurations
+.ipynb_checkpoints
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and outputs
+*.log
+runs/
+wandb/
+

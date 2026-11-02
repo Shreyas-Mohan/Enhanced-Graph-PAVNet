@@ -1,0 +1,32 @@
+models:
+  gat:
+    architecture: "PyG GAT (Veličković et al., ICLR 2018)"
+    in_channels: 584
+    hidden_channels: 128
+    out_channels: 2
+    num_layers: 3
+    heads: 4
+    dropout: 0.1
+    epochs: 50
+    lr: 0.0004
+    device: "cuda:0"
+  sage:
+    architecture: "PyG GraphSAGE (Hamilton et al., NeurIPS 2017)"
+    in_channels: 584
+    hidden_channels: 128
+    out_channels: 2
+    num_layers: 3
+    dropout: 0.1
+    epochs: 50
+    lr: 0.0004
+    device: "cuda:0"
+  baseline_hgat:
+    architecture: "Graph-PAVNet HGAT"
+    in_channels: 584
+    hidden_channels: 128
+    out_channels: 2
+    max_hops: 3
+    epochs: 50
+    lr: 0.0004
+    device: "cuda:0"
+

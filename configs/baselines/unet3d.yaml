@@ -1,0 +1,14 @@
+model: "unet3d"
+architecture: "MONAI UNet (Çiçek et al., MICCAI 2016)"
+in_channels: 1
+out_channels: 3 # 0: Background, 1: Artery, 2: Vein
+channels: [16, 32, 64, 128, 256]
+strides: [2, 2, 2, 2]
+patch_size: [64, 64, 64]
+batch_size: 2
+epochs: 50
+lr: 0.0002
+optimizer: "AdamW"
+loss: "DiceCELoss"
+device: "cuda:0"
+

@@ -1,0 +1,34 @@
+dataset:
+  name: "AirRC"
+  citation: "Liu et al., Sci Data 12, 1806 (2025)"
+  data_dir: "data/airrc"
+  splits_file: "data/splits/airrc_splits.json"
+  format: "nii.gz"
+  target_classes: 2 # 0: Artery, 1: Vein
+  node_count: 8192
+  knn_k: 10
+  feature_dim: 602 # 584 baseline + 18 optimal features
+  max_hops: 3
+
+training:
+  model: "enhanced_hgat"
+  device: "cuda:0"
+  epochs: 50
+  batch_size: 4
+  lr: 0.001
+  weight_decay: 0.00001
+  scheduler: "cosine"
+  eta_min: 0.00001
+  grad_clip: 1.0
+
+loss:
+  gamma: 2.0
+  lambda_seed: 0.05
+  lambda_cldice: 0.10
+  lambda_thick: 0.05
+  lambda_fpr: 0.05
+
+evaluation:
+  metrics: ["accuracy", "precision", "recall", "specificity", "dice", "miou", "hd95"]
+  decision_threshold: 0.50
+
