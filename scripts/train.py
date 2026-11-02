@@ -31,7 +31,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Train models for Pulmonary Artery-Vein Separation.")
     parser.add_argument("--config", type=str, default="configs/airrc.yaml", help="Path to YAML config file")
     parser.add_argument("--dataset", type=str, choices=["airrc", "hipas", "lung250m"], default=None, help="Dataset name override")
-    parser.add_argument("--model", type=str, default="enhanced_hgat", choices=["enhanced_hgat", "extended_hgat", "baseline_hgat", "gat", "sage", "unet3d", "swin_unetr"])
+    parser.add_argument("--model", type=str, default="enhanced_hgat", choices=["enhanced_hgat", "extended_hgat", "baseline_hgat", "gat", "sage", "unet3d", "vnet3d", "nnunet3d", "unetr3d", "swin_unetr"])
     parser.add_argument("--epochs", type=int, default=50, help="Number of training epochs (default: 50)")
     parser.add_argument("--batch-size", type=int, default=4, help="Batch size (default: 4)")
     parser.add_argument("--lr", type=float, default=1e-3, help="Initial learning rate (default: 1e-3)")
@@ -93,7 +93,7 @@ def main():
         model = BaselineHGATNet(in_channels=584, out_channels=2, max_hops=3)
     elif args.model in ["gat", "sage"]:
         model = StandardGNNBaseline(in_channels=584, hidden_channels=128, out_channels=2, model_type=args.model)
-    elif args.model in ["unet3d", "swin_unetr"]:
+    elif args.model in ["unet3d", "vnet3d", "nnunet3d", "unetr3d", "swin_unetr"]:
         raise NotImplementedError(
             f"Training volumetric models ({args.model}) operates on dense 3D CT patch volumes. "
             "Please use the volumetric dataset loader with configs/baselines/unet3d.yaml or swin_unetr.yaml."

@@ -137,6 +137,7 @@ Fetch pre-trained model weights into `checkpoints/`:
 ```bash
 python checkpoints/download_checkpoints.py --all
 ```
+> **Note**: Pre-trained model weights are currently placeholders and will soon be uploaded to Hugging Face upon paper publication. You can train all models directly from scratch (Step 3) or place locally trained weights into `checkpoints/`.
 
 ### 3. GPU Training
 Train Enhanced HGAT for 50 epochs on NVIDIA GPU:

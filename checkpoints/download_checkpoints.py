@@ -1,7 +1,14 @@
 #!/usr/bin/env python
 """
 Automated Downloader for Pre-Trained Checkpoints and Model Weights.
-Fetches weights from Zenodo / Hugging Face releases into the checkpoints/ folder.
+
+NOTE:
+The remote URLs configured below currently serve as placeholder endpoints.
+Trained model checkpoints are being prepared and will soon be uploaded to the Hugging Face
+Hub upon paper publication.
+In the meantime, you can:
+  1. Train models from scratch using `scripts/train.py`
+  2. Place locally trained `.pth` weight files directly in this directory
 """
 
 import os
@@ -10,6 +17,8 @@ import argparse
 from pathlib import Path
 import urllib.request
 
+# Placeholder Hugging Face repository endpoints.
+# These will be updated with the live Hugging Face repository upon publication release.
 CHECKPOINT_URLS = {
     # AirRC
     "airrc_enhanced_hgat_602.pth": "https://huggingface.co/pulmonary-vascular-ai/enhanced-hgat/resolve/main/airrc_enhanced_hgat_602.pth",
@@ -60,8 +69,9 @@ def main():
             urllib.request.urlretrieve(url, str(target_path))
             print(f"[SUCCESS] Downloaded: {fname}")
         except Exception as e:
-            print(f"[!] Note: Automatic download from remote repo requires public release URL ({e}).")
-            print(f"    You can manually place '{fname}' into {dest_dir}")
+            print(f"[!] Note: Remote checkpoints are currently placeholders ({e}).")
+            print(f"    Checkpoints will soon be uploaded to Hugging Face upon publication.")
+            print(f"    In the meantime, you can manually place '{fname}' into {dest_dir} or run scripts/train.py.")
 
 
 if __name__ == "__main__":

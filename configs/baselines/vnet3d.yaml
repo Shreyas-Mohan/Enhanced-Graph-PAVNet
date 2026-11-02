@@ -1,0 +1,13 @@
+model: "vnet3d"
+architecture: "MONAI VNet (Milletari et al., 3DV 2016)"
+in_channels: 1
+out_channels: 3 # 0: Background, 1: Artery, 2: Vein
+dropout_prob: 0.1
+patch_size: [64, 64, 64]
+batch_size: 2
+epochs: 50
+lr: 0.0002
+optimizer: "AdamW"
+loss: "DiceCELoss"
+device: "cuda:0"
+
