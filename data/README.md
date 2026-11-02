@@ -69,3 +69,10 @@ data/<dataset_name>/
 └── features_optimal_602/  # [N, 18] or [N, 602] domain-specific optimal feature tensors (.pth)
 ```
 
+---
+
+## 3. Landmark Graph Sampling & Preprocessing
+
+Vascular landmark graphs ($N = 8,192$ nodes per scan) are extracted from binary vessel masks using distance-transform-weighted sampling. Graph edges are constructed via 3D spatial Euclidean $k$-nearest neighbors ($k=3$, bidirectional), connecting adjacent vascular segments and naturally bridging small $1\text{--}3\text{ mm}$ partial-volume discontinuities without requiring unbroken 1D medial centerlines.
+
+

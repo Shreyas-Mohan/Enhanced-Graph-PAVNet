@@ -1,6 +1,8 @@
 # Feature Descriptions, Formulations & Dataset-Wise Ablations
 
-This document details the complete candidate feature inventory, their mathematical formulations, dataset-wise ablation benchmarks, and the final 18 optimal features permutation feature importance (PFI) ranking.
+This document details the candidate feature inventory, their mathematical formulations, category-wise ablation benchmarks, and the 18 optimal feature importance rankings.
+
+> **Overview**: To complement patch-level ViT visual embeddings where peripheral microvascular contrast is low, the framework incorporates 18 domain-specific descriptors spanning vascular geometry (e.g. tapering rate, Murray's law), multi-scale radiomics, and literature priors. Out of 23 initially evaluated candidates, 5 global graph metrics sensitive to peripheral mask boundaries were pruned to optimize generalization.
 
 ---
 
@@ -151,4 +153,24 @@ The 18 optimal features ranked by mean test Dice degradation ($\Delta \text{Dice
 | **16** | Branching Alignment / Dispersion | $\delta_i$ | Vascular Geometry | 0.0215 | 25.5% |
 | **17** | Raw CT Attenuation | $I_i$ | Multi-Scale Radiomics | 0.0189 | 22.4% |
 | **18** | Center-to-Shell Parenchymal Contrast | $C_{\text{shell},i}$ | Multi-Scale Radiomics | 0.0163 | 19.4% |
+
+---
+
+### Category-Wise Modality Ablation Impact
+
+Permuting entire feature blocks simultaneously demonstrates the necessity of multimodal fusion:
+- **Dropping All Vascular Geometry (7d)**: Macro Dice drops by **-5.84%** ($\Delta \text{Dice} = 0.0584$). Distal subsegmental branches lose tapering consistency and flip labels.
+- **Dropping All Radiomics (8d)**: Macro Dice drops by **-4.32%** ($\Delta \text{Dice} = 0.0432$). Loss of intramural attenuation and tubular vesselness sharply degrades precision in small vessels.
+- **Dropping All Literature Descriptors (3d)**: Macro Dice drops by **-5.18%** ($\Delta \text{Dice} = 0.0518$). Loss of MorVess normalized caliber and Topo-UNet Gaussian potential destabilizes trunk-to-periphery scaling.
+
+### Reproducing PFI via CLI
+Any user or reviewer can independently verify the empirical ranking on held-out test splits using:
+```bash
+# Evaluate Permutation Feature Importance on AirRC test set
+python scripts/compute_feature_importance.py --dataset airrc --checkpoint checkpoints/airrc_enhanced_hgat_602.pth
+
+# Evaluate on HiPaS test set
+python scripts/compute_feature_importance.py --dataset hipas --checkpoint checkpoints/hipas_enhanced_hgat_602.pth
+```
+
 

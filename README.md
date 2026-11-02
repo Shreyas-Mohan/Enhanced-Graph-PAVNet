@@ -66,12 +66,14 @@ To resolve these bottlenecks, we introduce three core technical enhancements:
      - *High-Impact Literature Descriptors (3d)*: scale-invariant normalized caliber $\tilde{r}_i$ (*MorVess*), topological Gaussian radial decay $G_{\text{topo},i}$ (*Topo-UNet*), and intramural attenuation Z-contrast gradient $Z_{\text{contrast},i}$ (*MorVess*).
 2. **3-Branch Decoupled Cross-Gating Fusion Adapter**:
    - Decouples input representations into three dedicated semantic projections: Visual ViT (256d), Radiomic Textures (128d), and Geometric Morphometry (128d).
-   - Local caliber serves as the conditioning query: in central trunks, visual features are emphasized; in thin peripheral vessels, geometric tapering and radiomic vesselness are upweighted.
+   - Caliber-conditioned gating balances visual features in central trunks with geometric continuity in distal peripheral vessels.
 3. **Multi-Objective Topological & Caliber Loss Formulation**:
-   - **Graph Centerline Continuity Loss ($\mathcal{L}_{\text{cldice}}$)**: Enforces smooth cosine probability continuity across same-class skeleton edges, weighted by local caliber $w_{uv} = \min(r_u, r_v)$ (adapted from Shit et al., CVPR 2021).
+   - **Graph Centerline Continuity Loss ($\mathcal{L}_{\text{cldice}}$)**: Enforces smooth cosine probability continuity across same-class skeleton edges (adapted from Shit et al., CVPR 2021).
    - **Auxiliary Caliber Regression Head ($\mathcal{L}_{\text{thick}}$)**: Smooth L1 diameter supervision preserves natural proximal-to-distal vascular tapering (adapted from MorVess).
    - **Artery-Vein FPR Crossover Penalty ($\mathcal{L}_{\text{fpr}}$)**: Suppresses label flipping in parallel companion vascular bundles (adapted from Topo-UNet).
    - **Radius-Weighted Focal Loss ($\mathcal{L}_{\text{focal}}$)**: Directly prioritizes thin peripheral vessels (BV5 clinical focus).
+4. **Spatial Landmark Skeleton Graph ($N=8,192$)**:
+   - Constructs 3D spatial graphs over distance-weighted landmark point clouds via spatial $k$-NN ($k=3$, bidirectional), naturally robust to local partial-volume breaks.
 
 ---
 
@@ -86,7 +88,7 @@ To resolve these bottlenecks, we introduce three core technical enhancements:
 | [`src/losses/`](src/losses/) | Multi-objective topological and caliber losses | [`focal_dice.py`](src/losses/focal_dice.py), [`cldice_graph.py`](src/losses/cldice_graph.py), [`multi_task_loss.py`](src/losses/multi_task_loss.py) |
 | [`src/evaluation/`](src/evaluation/) | 7 standardized metrics & COPD clinical imaging biomarkers | [`metrics.py`](src/evaluation/metrics.py), [`biomarkers.py`](src/evaluation/biomarkers.py), [`postprocessing.py`](src/evaluation/postprocessing.py) |
 | [`src/utils/`](src/utils/) | Medial-axis skeletonization, k-NN graph builder, visualizer | [`graph_builder.py`](src/utils/graph_builder.py), [`visualization.py`](src/utils/visualization.py) |
-| [`scripts/`](scripts/) | High-level CLI entry points for GPU training & evaluation | [`train.py`](scripts/train.py), [`evaluate.py`](scripts/evaluate.py), [`extract_features.py`](scripts/extract_features.py), [`run_ablations.py`](scripts/run_ablations.py) |
+| [`scripts/`](scripts/) | High-level CLI entry points for GPU training & evaluation | [`train.py`](scripts/train.py), [`evaluate.py`](scripts/evaluate.py), [`extract_features.py`](scripts/extract_features.py), [`run_ablations.py`](scripts/run_ablations.py), [`compute_feature_importance.py`](scripts/compute_feature_importance.py) |
 | [`checkpoints/`](checkpoints/) | Model weights downloader and instructions | [`README.md`](checkpoints/README.md), [`download_checkpoints.py`](checkpoints/download_checkpoints.py) |
 | [`docs/`](docs/) | Benchmark tables, ablation formulas, high-res prediction grids, and report | [`BENCHMARKS.md`](docs/BENCHMARKS.md), [`ABLATION_DETAILS.md`](docs/ABLATION_DETAILS.md), [`figures/`](docs/figures/), [`reports/`](docs/reports/) |
 

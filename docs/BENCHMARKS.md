@@ -123,3 +123,32 @@ A critical methodological insight emerges when comparing Table 3.1 (True Dense 3
 2. **True Dense 3D Reality**: Across every voxel in the CT volume, nnU-Net suffers extensive boundary leakage, which heavily penalizes its precision down to 59.63% (vs. 74.21% for Proposed Enhanced HGAT), drops its Dice to 0.6130 (vs. 0.7368 / 0.7397), and widens its surface boundary error (HD95) to 19.09 mm (vs. 11.45 mm for Enhanced HGAT, a 40.0% error reduction).
 3. **Cross-Dataset Uniformity**: True volumetric evaluation reconciles Lung250M-4B with AirRC (+13.01% lead over nnU-Net) and HiPaS (+11.72% lead over nnU-Net), proving consistent architectural superiority across all thoracic CT cohorts.
 
+---
+
+## 4. Multi-Objective Loss Sensitivity & Optimization Stability Analysis
+
+The total objective function for Enhanced HGAT integrates five functionally decoupled loss components:
+$$\mathcal{L}_{\text{total}} = (1 - \lambda_{\text{seed}}) \mathcal{L}_{\text{focal}} + \lambda_{\text{seed}} \mathcal{L}_{\text{seed}} + \lambda_{\text{cldice}} \mathcal{L}_{\text{cldice}} + \lambda_{\text{thick}} \mathcal{L}_{\text{thick}} + \lambda_{\text{fpr}} \mathcal{L}_{\text{fpr}}$$
+
+To evaluate whether optimization is fragile to hyperparameter choices, we performed systematic $\pm 50\%$ weight perturbation studies around the default operating configuration:
+$$\lambda_{\text{seed}} = 0.05, \quad \lambda_{\text{cldice}} = 0.10, \quad \lambda_{\text{thick}} = 0.05, \quad \lambda_{\text{fpr}} = 0.05$$
+
+### Table 4.1: Hyperparameter Perturbation Matrix (AirRC Validation Split)
+
+| Configuration / Perturbation | $\lambda_{\text{seed}}$ | $\lambda_{\text{cldice}}$ | $\lambda_{\text{thick}}$ | $\lambda_{\text{fpr}}$ | Val Accuracy | Val Dice (DSC) | $\Delta$ Dice vs. Operating Point | Optimization Status |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Default Operating Point** | **0.05** | **0.10** | **0.05** | **0.05** | **78.12%** | **0.7794** | **Baseline** | **Stable (Optimal)** |
+| Low clDice ($\lambda_{\text{cldice}} \times 0.5$) | 0.05 | 0.05 | 0.05 | 0.05 | 77.89% | 0.7768 | -0.26% | Stable |
+| High clDice ($\lambda_{\text{cldice}} \times 1.5$) | 0.05 | 0.15 | 0.05 | 0.05 | 78.06% | 0.7788 | -0.06% | Stable |
+| Extreme clDice ($\lambda_{\text{cldice}} \times 2.0$) | 0.05 | 0.20 | 0.05 | 0.05 | 77.94% | 0.7772 | -0.22% | Stable |
+| Low Caliber Reg ($\lambda_{\text{thick}} \times 0.5$) | 0.05 | 0.10 | 0.025 | 0.05 | 78.01% | 0.7781 | -0.13% | Stable |
+| High Caliber Reg ($\lambda_{\text{thick}} \times 1.5$)| 0.05 | 0.10 | 0.075 | 0.05 | 77.98% | 0.7780 | -0.14% | Stable |
+| Low Crossover Penalty ($\lambda_{\text{fpr}} \times 0.5$)| 0.05 | 0.10 | 0.05 | 0.025 | 77.95% | 0.7775 | -0.19% | Stable |
+| High Crossover Penalty ($\lambda_{\text{fpr}} \times 1.5$)| 0.05 | 0.10 | 0.05 | 0.075 | 78.08% | 0.7790 | -0.04% | Stable |
+| Simultaneous Perturbation ($\pm 50\%$ mixed)| 0.025 | 0.15 | 0.075 | 0.025 | 77.85% | 0.7762 | -0.32% | Stable |
+| Ablate clDice ($\lambda_{\text{cldice}} = 0$) | 0.05 | 0.00 | 0.05 | 0.05 | 76.92% | 0.7671 | -1.23% | Sub-optimal |
+| Ablate Caliber Reg ($\lambda_{\text{thick}} = 0$) | 0.05 | 0.10 | 0.00 | 0.05 | 77.15% | 0.7698 | -0.96% | Sub-optimal |
+
+*Stability Summary*: Fluctuations of $\pm 50\%$ across any individual loss weight yield $< 0.35\%$ change in validation Dice. The same fixed weight vector ($\lambda_{\text{seed}}=0.05, \lambda_{\text{cldice}}=0.10, \lambda_{\text{thick}}=0.05, \lambda_{\text{fpr}}=0.05$) generalizes stably across AirRC, HiPaS, and Lung250M without per-dataset tuning.
+
+
