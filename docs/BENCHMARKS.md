@@ -11,14 +11,14 @@ All models were evaluated under identical zero-patient-leakage protocols across 
 
 All models were trained for 50 epochs.
 
-> 📄 **Complete Mentor Research Report**: A formatted Word document (`.docx`) containing these benchmarks alongside the canonical baselines table, mathematical formulations, and 13 qualitative prediction grid panels is located at [`docs/reports/Pulmonary_Artery_Vein_Separation_Report.docx`](reports/Pulmonary_Artery_Vein_Separation_Report.docx).
+> Complete mentor report document (`.docx`) containing these benchmarks alongside the canonical baselines table and qualitative figures is located at [`docs/reports/Pulmonary_Artery_Vein_Separation_Report.docx`](reports/Pulmonary_Artery_Vein_Separation_Report.docx).
 
 ---
 
 ## 1. AirRC Thoracic CT Benchmark (Held-Out Test Split: 39 Scans)
 
 - **Dataset Citation**: Liu, J., Zhang, Z., Niu, B. et al. *A Custom Annotated Dataset for Segmentation of Pulmonary Veins, Arteries, and Airways.* Sci Data 12, 1806 (2025). [https://doi.org/10.1038/s41597-025-06074-6](https://doi.org/10.1038/s41597-025-06074-6)
-- **Cohort**: 254 thoracic CT scans (177 train / 38 val / 39 test), resampled to isotropic 1.0 mm³ grid (1 voxel = 1.0 physical mm).
+- **Cohort**: 254 thoracic CT scans (177 train / 38 val / 39 test), resampled to isotropic 1.0 mm grid (1 voxel = 1.0 physical mm).
 
 | Model Architecture | Paradigm / Dims | Accuracy | Precision | Recall | Specificity | Dice (DSC) | mIoU | HD95 (mm) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -39,19 +39,19 @@ All models were trained for 50 epochs.
 
 ## 2. HiPaS 2025 Thoracic CT Benchmark (Held-Out Test Split: 37 Scans)
 
-- **Dataset Citation**: Chu, Y., Luo, G., Zhou, L. et al. *Deep learning-driven pulmonary artery and vein segmentation reveals demography-associated vasculature anatomical differences.* Nat Commun 16, 2262 (2025). [https://doi.org/10.1038/s41467-025-56505-6](https://doi.org/10.1038/s41467-025-56505-6)
+- **Dataset Citation**: Chu, Y., Luo, G., Zhou, L. et al. *Deep learning-driven pulmonary artery and vein segmentation reveals demography-associated vasculature anatomical differences.* Nat Commun 16, 2262 (2025). [https://doi.org/10.1038/s41597-025-56505-6](https://doi.org/10.1038/s41597-025-56505-6)
 - **Cohort**: 250 scans (175 train / 38 val / 37 test), compressed NPZ arrays with dynamic physical millimeter spacing.
 
 ### 2.1 Dense Volumetric Baselines (Voxel Space, Full Lung CT)
-*Evaluated across all CT voxels via 3D sliding window ($64^3$). Voxel accuracy reflects background non-vascular lung parenchyma (>98% of thoracic volume).*
+*Evaluated across all CT voxels via 3D sliding window (64x64x64). Voxel accuracy reflects background non-vascular lung parenchyma (>98% of thoracic volume).*
 
 | Model Architecture | Category / Representation | Voxel Acc | Precision | Recall | Specificity | Dice (DSC) | mIoU | HD95 (mm) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **3D Swin UNETR** | Shifted-Window ViT (64³) | 98.39% | 20.85% | 75.56% | 98.50% | 0.3229 | 0.1940 | 98.06 |
-| **3D UNETR** | Vision Transformer (64³) | 98.79% | 25.00% | 69.03% | 98.94% | 0.3623 | 0.2230 | 90.89 |
-| **3D U-Net** | MONAI CNN (64³) | 99.46% | 47.07% | 69.34% | 99.62% | 0.5551 | 0.3861 | 94.34 |
-| **3D V-Net** | Residual CNN (64³) | 99.64% | 60.88% | 79.50% | 99.75% | 0.6838 | 0.5214 | 73.22 |
-| **3D nnU-Net** | DynUNet (64³) | 99.74% | 70.88% | 82.14% | 99.83% | 0.7573 | 0.6114 | 58.98 |
+| **3D Swin UNETR** | Shifted-Window ViT (64x64x64) | 98.39% | 20.85% | 75.56% | 98.50% | 0.3229 | 0.1940 | 98.06 |
+| **3D UNETR** | Vision Transformer (64x64x64) | 98.79% | 25.00% | 69.03% | 98.94% | 0.3623 | 0.2230 | 90.89 |
+| **3D U-Net** | MONAI CNN (64x64x64) | 99.46% | 47.07% | 69.34% | 99.62% | 0.5551 | 0.3861 | 94.34 |
+| **3D V-Net** | Residual CNN (64x64x64) | 99.64% | 60.88% | 79.50% | 99.75% | 0.6838 | 0.5214 | 73.22 |
+| **3D nnU-Net** | DynUNet (64x64x64) | 99.74% | 70.88% | 82.14% | 99.83% | 0.7573 | 0.6114 | 58.98 |
 
 *Note on 3D Swin UNETR*: At vascular skeleton landmark points, Swin UNETR achieves Point Acc: 55.15%, Point Dice: 0.4132, and Point HD95: 38.30 mm.
 
@@ -76,7 +76,7 @@ All models were trained for 50 epochs.
 
 - **Dataset Citation**: Falta, F., Großbröhmer, C., Hering, A., Bigalke, A., Heinrich, M. *Lung250M-4B: A Combined 3D Dataset for CT- and Point Cloud-Based Intra-Patient Lung Registration.* Advances in Neural Information Processing Systems 36 (NeurIPS 2023) Datasets and Benchmarks Track. DOI: [10.52202/075280-2392](https://doi.org/10.52202/075280-2392)
 - **Cohort**: 248 scans from 124 patients, paired inspiratory (`_1`) and expiratory (`_2`) acquisitions. Group split: 138 train (69 pairs) / 36 val (18 pairs) / 30 test (15 pairs).
-- **Dual Evaluation Regimes**: To provide complete methodological rigor and direct comparability across all three clinical datasets, models are benchmarked under two standardized evaluation protocols:
+- **Dual Evaluation Regimes**: Models are benchmarked under two standardized evaluation protocols:
   1. **Table 3.1: True Dense 3D Volumetric Master Benchmark**: Evaluated across every voxel in the complete 3D CT volume against dense multi-class ground truth (`dataset/segTs/`).
   2. **Table 3.2: Landmark Centerline Point-Cloud Benchmark**: Evaluated directly on the 8,192 medial-axis vascular skeleton landmark nodes per scan.
 
@@ -85,10 +85,10 @@ All models were trained for 50 epochs.
 
 | Model Architecture | Paradigm / Representation | Accuracy | Precision | Recall | Specificity | Dice (DSC) | mIoU | HD95 (mm) |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **3D Swin UNETR** | Shifted-Window ViT (64³) | 95.77% | 4.28% | 29.68% | 96.08% | 0.0730 | 0.0380 | 67.34 |
-| **3D U-Net** | Dense Volumetric CNN (64³) | 99.52% | 41.86% | 34.48% | 99.79% | 0.3702 | 0.2288 | 47.25 |
-| **3D UNETR** | Vision Transformer (64³) | 99.53% | 45.88% | 48.36% | 99.74% | 0.4629 | 0.3042 | 56.62 |
-| **3D V-Net** | Residual Volumetric CNN (64³) | 99.53% | 47.78% | 57.19% | 99.71% | 0.5116 | 0.3464 | 32.86 |
+| **3D Swin UNETR** | Shifted-Window ViT (64x64x64) | 95.77% | 4.28% | 29.68% | 96.08% | 0.0730 | 0.0380 | 67.34 |
+| **3D U-Net** | Dense Volumetric CNN (64x64x64) | 99.52% | 41.86% | 34.48% | 99.79% | 0.3702 | 0.2288 | 47.25 |
+| **3D UNETR** | Vision Transformer (64x64x64) | 99.53% | 45.88% | 48.36% | 99.74% | 0.4629 | 0.3042 | 56.62 |
+| **3D V-Net** | Residual Volumetric CNN (64x64x64) | 99.53% | 47.78% | 57.19% | 99.71% | 0.5116 | 0.3464 | 32.86 |
 | **3D nnU-Net** | Self-Configuring DynUNet | 99.65% | 59.63% | 64.68% | 99.80% | 0.6130 | 0.4456 | 19.09 |
 | **Standard GAT** | Graph Attention (584d) | 99.68% | 67.00% | 65.47% | 99.81% | 0.6537 | 0.4885 | 12.88 |
 | **Standard GraphSAGE** | Inductive GNN (584d) | 99.69% | 68.21% | 66.68% | 99.82% | 0.6659 | 0.5019 | 12.47 |
@@ -117,38 +117,33 @@ All models were trained for 50 epochs.
 | **Enhanced HGAT (Proposed)** | Decoupled GNN (602d) | 73.95% | 74.07% | 74.03% | 74.03% | 0.7373 | 0.5863 | **13.05** |
 | **Extended-HGAT (Best Features)**| Multimodal (602d) | **74.33%** | **74.42%** | **74.45%** | **74.45%** | **0.7414** | **0.5915** | 13.11 |
 
-### 3.3 Point Cloud vs. Dense 3D Voxel Disparity Analysis
-A critical methodological insight emerges when comparing Table 3.1 (True Dense 3D Voxel) and Table 3.2 (Centerline Point Cloud):
-1. **Centerline Sampling Artifact**: Point-cloud evaluation only queries 8,192 medial-axis skeleton nodes deep within vessel lumens where contrast is highest. Because non-vessel lung parenchyma contains zero centerline nodes, volumetric CNN false-positive bleeding into parenchymal tissue is completely hidden under point-cloud sampling.
-2. **True Dense 3D Reality**: Across every voxel in the CT volume, nnU-Net suffers extensive boundary leakage, which heavily penalizes its precision down to 59.63% (vs. 74.21% for Proposed Enhanced HGAT), drops its Dice to 0.6130 (vs. 0.7368 / 0.7397), and widens its surface boundary error (HD95) to 19.09 mm (vs. 11.45 mm for Enhanced HGAT, a 40.0% error reduction).
-3. **Cross-Dataset Uniformity**: True volumetric evaluation reconciles Lung250M-4B with AirRC (+13.01% lead over nnU-Net) and HiPaS (+11.72% lead over nnU-Net), proving consistent architectural superiority across all thoracic CT cohorts.
-
 ---
 
 ## 4. Multi-Objective Loss Sensitivity & Optimization Stability Analysis
 
-The total objective function for Enhanced HGAT integrates five functionally decoupled loss components:
-$$\mathcal{L}_{\text{total}} = (1 - \lambda_{\text{seed}}) \mathcal{L}_{\text{focal}} + \lambda_{\text{seed}} \mathcal{L}_{\text{seed}} + \lambda_{\text{cldice}} \mathcal{L}_{\text{cldice}} + \lambda_{\text{thick}} \mathcal{L}_{\text{thick}} + \lambda_{\text{fpr}} \mathcal{L}_{\text{fpr}}$$
-
-To evaluate whether optimization is fragile to hyperparameter choices, we performed systematic $\pm 50\%$ weight perturbation studies around the default operating configuration:
-$$\lambda_{\text{seed}} = 0.05, \quad \lambda_{\text{cldice}} = 0.10, \quad \lambda_{\text{thick}} = 0.05, \quad \lambda_{\text{fpr}} = 0.05$$
+The objective function for Enhanced HGAT balances five complementary loss components:
+1. **Focal Loss**: Core class-balanced loss focusing on hard peripheral vessel nodes.
+2. **Seed Supervision**: High-confidence root supervision near cardiac hilum entry points (weight: 0.05).
+3. **clDice Graph Continuity**: Centerline topological smoothness constraint along vascular branches (weight: 0.10).
+4. **Caliber Regularization**: Continuous lumen diameter radius regression maintaining proximal-to-distal vessel tapering (weight: 0.05).
+5. **Crossover Penalty**: False-positive penalty preventing label switching across parallel companion artery-vein pairs (weight: 0.05).
 
 ### Table 4.1: Hyperparameter Perturbation Matrix (AirRC Validation Split)
 
-| Configuration / Perturbation | $\lambda_{\text{seed}}$ | $\lambda_{\text{cldice}}$ | $\lambda_{\text{thick}}$ | $\lambda_{\text{fpr}}$ | Val Accuracy | Val Dice (DSC) | $\Delta$ Dice vs. Operating Point | Optimization Status |
+To evaluate optimization stability, weights were perturbed by ±50% around the default configuration:
+
+| Configuration / Perturbation | Seed Weight | clDice Weight | Caliber Weight | Crossover Weight | Val Accuracy | Val Dice (DSC) | Change in Dice | Optimization Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Default Operating Point** | **0.05** | **0.10** | **0.05** | **0.05** | **78.12%** | **0.7794** | **Baseline** | **Stable (Optimal)** |
-| Low clDice ($\lambda_{\text{cldice}} \times 0.5$) | 0.05 | 0.05 | 0.05 | 0.05 | 77.89% | 0.7768 | -0.26% | Stable |
-| High clDice ($\lambda_{\text{cldice}} \times 1.5$) | 0.05 | 0.15 | 0.05 | 0.05 | 78.06% | 0.7788 | -0.06% | Stable |
-| Extreme clDice ($\lambda_{\text{cldice}} \times 2.0$) | 0.05 | 0.20 | 0.05 | 0.05 | 77.94% | 0.7772 | -0.22% | Stable |
-| Low Caliber Reg ($\lambda_{\text{thick}} \times 0.5$) | 0.05 | 0.10 | 0.025 | 0.05 | 78.01% | 0.7781 | -0.13% | Stable |
-| High Caliber Reg ($\lambda_{\text{thick}} \times 1.5$)| 0.05 | 0.10 | 0.075 | 0.05 | 77.98% | 0.7780 | -0.14% | Stable |
-| Low Crossover Penalty ($\lambda_{\text{fpr}} \times 0.5$)| 0.05 | 0.10 | 0.05 | 0.025 | 77.95% | 0.7775 | -0.19% | Stable |
-| High Crossover Penalty ($\lambda_{\text{fpr}} \times 1.5$)| 0.05 | 0.10 | 0.05 | 0.075 | 78.08% | 0.7790 | -0.04% | Stable |
-| Simultaneous Perturbation ($\pm 50\%$ mixed)| 0.025 | 0.15 | 0.075 | 0.025 | 77.85% | 0.7762 | -0.32% | Stable |
-| Ablate clDice ($\lambda_{\text{cldice}} = 0$) | 0.05 | 0.00 | 0.05 | 0.05 | 76.92% | 0.7671 | -1.23% | Sub-optimal |
-| Ablate Caliber Reg ($\lambda_{\text{thick}} = 0$) | 0.05 | 0.10 | 0.00 | 0.05 | 77.15% | 0.7698 | -0.96% | Sub-optimal |
+| Low clDice (0.5x) | 0.05 | 0.05 | 0.05 | 0.05 | 77.89% | 0.7768 | -0.26% | Stable |
+| High clDice (1.5x) | 0.05 | 0.15 | 0.05 | 0.05 | 78.06% | 0.7788 | -0.06% | Stable |
+| Extreme clDice (2.0x) | 0.05 | 0.20 | 0.05 | 0.05 | 77.94% | 0.7772 | -0.22% | Stable |
+| Low Caliber Reg (0.5x) | 0.05 | 0.10 | 0.025 | 0.05 | 78.01% | 0.7781 | -0.13% | Stable |
+| High Caliber Reg (1.5x) | 0.05 | 0.10 | 0.075 | 0.05 | 77.98% | 0.7780 | -0.14% | Stable |
+| Low Crossover Penalty (0.5x) | 0.05 | 0.10 | 0.05 | 0.025 | 77.95% | 0.7775 | -0.19% | Stable |
+| High Crossover Penalty (1.5x) | 0.05 | 0.10 | 0.05 | 0.075 | 78.08% | 0.7790 | -0.04% | Stable |
+| Simultaneous Perturbation (±50% mixed) | 0.025 | 0.15 | 0.075 | 0.025 | 77.85% | 0.7762 | -0.32% | Stable |
+| Ablate clDice (0.0) | 0.05 | 0.00 | 0.05 | 0.05 | 76.92% | 0.7671 | -1.23% | Sub-optimal |
+| Ablate Caliber Reg (0.0) | 0.05 | 0.10 | 0.00 | 0.05 | 77.15% | 0.7698 | -0.96% | Sub-optimal |
 
-*Stability Summary*: Fluctuations of $\pm 50\%$ across any individual loss weight yield $< 0.35\%$ change in validation Dice. The same fixed weight vector ($\lambda_{\text{seed}}=0.05, \lambda_{\text{cldice}}=0.10, \lambda_{\text{thick}}=0.05, \lambda_{\text{fpr}}=0.05$) generalizes stably across AirRC, HiPaS, and Lung250M without per-dataset tuning.
-
-
+*Stability Summary*: Fluctuations of ±50% across any individual loss weight yield < 0.35% change in validation Dice score. The same fixed weight vector (Seed: 0.05, clDice: 0.10, Caliber: 0.05, Crossover: 0.05) generalizes stably across AirRC, HiPaS, and Lung250M without per-dataset tuning.
