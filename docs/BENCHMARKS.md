@@ -17,7 +17,7 @@ All models were trained for 50 epochs.
 
 ## 1. AirRC Thoracic CT Benchmark (Held-Out Test Split: 39 Scans)
 
-- **Dataset Citation**: Liu, J., Zhang, Z., Niu, B. et al. *A Custom Annotated Dataset for Segmentation of Pulmonary Veins, Arteries, and Airways.* Sci Data 12, 1806 (2025). [https://doi.org/10.1038/s41597-025-06074-6](https://doi.org/10.1038/s41597-025-06074-6)
+- **Dataset Citation**: Liu, J., Zhang, Z., Niu, B. et al. *A Custom Annotated Dataset for Segmentation of Pulmonary Veins, Arteries, and Airways.* [Nature Scientific Data 12, 1806 (2025)](https://doi.org/10.1038/s41597-025-06074-6).
 - **Cohort**: 254 thoracic CT scans (177 train / 38 val / 39 test), resampled to isotropic 1.0 mm grid (1 voxel = 1.0 physical mm).
 
 | Model Architecture | Paradigm / Dims | Accuracy | Precision | Recall | Specificity | Dice (DSC) | mIoU | HD95 (mm) |
@@ -39,7 +39,7 @@ All models were trained for 50 epochs.
 
 ## 2. HiPaS 2025 Thoracic CT Benchmark (Held-Out Test Split: 37 Scans)
 
-- **Dataset Citation**: Chu, Y., Luo, G., Zhou, L. et al. *Deep learning-driven pulmonary artery and vein segmentation reveals demography-associated vasculature anatomical differences.* Nat Commun 16, 2262 (2025). [https://doi.org/10.1038/s41597-025-56505-6](https://doi.org/10.1038/s41597-025-56505-6)
+- **Dataset Citation**: Chu, Y., Luo, G., Zhou, L. et al. *Deep learning-driven pulmonary artery and vein segmentation reveals demography-associated vasculature anatomical differences.* [Nature Communications 16, 2262 (2025)](https://doi.org/10.1038/s41467-025-56505-6).
 - **Cohort**: 250 scans (175 train / 38 val / 37 test), compressed NPZ arrays with dynamic physical millimeter spacing.
 
 ### 2.1 Dense Volumetric Baselines (Voxel Space, Full Lung CT)
@@ -74,7 +74,7 @@ All models were trained for 50 epochs.
 
 ## 3. Lung250M-4B Thoracic CT Benchmark (Held-Out Test Split: 30 Paired Scans)
 
-- **Dataset Citation**: Falta, F., Großbröhmer, C., Hering, A., Bigalke, A., Heinrich, M. *Lung250M-4B: A Combined 3D Dataset for CT- and Point Cloud-Based Intra-Patient Lung Registration.* Advances in Neural Information Processing Systems 36 (NeurIPS 2023) Datasets and Benchmarks Track. DOI: [10.52202/075280-2392](https://doi.org/10.52202/075280-2392)
+- **Dataset Citation**: Falta, F., Großbröhmer, C., Hering, A., Bigalke, A., Heinrich, M. *Lung250M-4B: A Combined 3D Dataset for CT- and Point Cloud-Based Intra-Patient Lung Registration.* [NeurIPS 2023 Datasets and Benchmarks Track](https://doi.org/10.52202/075280-2392) ([OpenReview](https://openreview.net/forum?id=j3E3mSsm8w)).
 - **Cohort**: 248 scans from 124 patients, paired inspiratory (`_1`) and expiratory (`_2`) acquisitions. Group split: 138 train (69 pairs) / 36 val (18 pairs) / 30 test (15 pairs).
 - **Dual Evaluation Regimes**: Models are benchmarked under two standardized evaluation protocols:
   1. **Table 3.1: True Dense 3D Volumetric Master Benchmark**: Evaluated across every voxel in the complete 3D CT volume against dense multi-class ground truth (`dataset/segTs/`).

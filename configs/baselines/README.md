@@ -6,20 +6,20 @@ This directory contains configuration files for the canonical deep learning and 
 
 ## 1. Dense Volumetric 3D Baselines (Project MONAI)
 
-All dense volumetric architectures are instantiated via **Project MONAI** (`monai.networks.nets`), adhering strictly to standard benchmark implementations in the medical image segmentation literature:
+All dense volumetric architectures are instantiated via [**Project MONAI**](https://monai.io/) (`monai.networks.nets`), adhering strictly to standard benchmark implementations in the medical image segmentation literature:
 
-| Model | Config File | MONAI Class | Citation | Key Hyperparameters |
+| Model | Config File | MONAI Class | Literature Reference | Key Hyperparameters |
 | :--- | :--- | :--- | :--- | :--- |
-| **3D U-Net** | [`unet3d.yaml`](unet3d.yaml) | `monai.networks.nets.UNet` | Çiçek et al. (*MICCAI 2016*) | 5 stages, channels: [16, 32, 64, 128, 256], strides: 2, InstanceNorm |
-| **V-Net** | [`vnet3d.yaml`](vnet3d.yaml) | `monai.networks.nets.VNet` | Milletari et al. (*3DV 2016*) | Residual volumetric blocks, ELU activation, dropout: 0.1 |
-| **nnU-Net** | [`nnunet3d.yaml`](nnunet3d.yaml) | `monai.networks.nets.DynUNet` | Isensee et al. (*Nature Methods 2021*) | Self-configuring dynamic U-Net, LeakyReLU, deep supervision ready |
-| **UNETR** | [`unetr3d.yaml`](unetr3d.yaml) | `monai.networks.nets.UNETR` | Hatamizadeh et al. (*WACV 2022*) | ViT transformer backbone (12 heads, hidden: 768, MLP: 3072), deconv decoders |
-| **Swin UNETR** | [`swin_unetr.yaml`](swin_unetr.yaml) | `monai.networks.nets.SwinUNETR` | Tang et al. (*MICCAI BrainLes 2021*) | Hierarchical shifted-window transformer, feature size: 48, checkpointing |
+| **3D U-Net** | [`unet3d.yaml`](unet3d.yaml) | `monai.networks.nets.UNet` | [Çiçek et al. (MICCAI 2016)](https://doi.org/10.1007/978-3-319-46723-8_49) | 5 stages, channels: [16, 32, 64, 128, 256], strides: 2, InstanceNorm |
+| **V-Net** | [`vnet3d.yaml`](vnet3d.yaml) | `monai.networks.nets.VNet` | [Milletari et al. (3DV 2016)](https://doi.org/10.1109/3DV.2016.79) | Residual volumetric blocks, ELU activation, dropout: 0.1 |
+| **nnU-Net** | [`nnunet3d.yaml`](nnunet3d.yaml) | `monai.networks.nets.DynUNet` | [Isensee et al. (Nature Methods 2021)](https://doi.org/10.1038/s41592-020-01008-z) | Self-configuring dynamic U-Net, LeakyReLU, deep supervision ready |
+| **UNETR** | [`unetr3d.yaml`](unetr3d.yaml) | `monai.networks.nets.UNETR` | [Hatamizadeh et al. (WACV 2022)](https://doi.org/10.1109/WACV51458.2022.00181) | ViT transformer backbone (12 heads, hidden: 768, MLP: 3072), deconv decoders |
+| **Swin UNETR** | [`swin_unetr.yaml`](swin_unetr.yaml) | `monai.networks.nets.SwinUNETR` | [Tang et al. (MICCAI BrainLes 2021)](https://arxiv.org/abs/2111.14791) | Hierarchical shifted-window transformer, feature size: 48, checkpointing |
 
 ### Volumetric Training Details
 - **Loss Function**: Combined Dice and Cross-Entropy Loss (`DiceCELoss(to_onehot_y=True, softmax=True)`).
-- **Patch Extraction**: $64 \times 64 \times 64$ voxel sliding windows sampled centered around pulmonary vessel segments.
-- **Optimization**: AdamW optimizer with initial learning rate $\eta \in [10^{-4}, 3 \times 10^{-4}]$, cosine annealing scheduler, 50 epochs on NVIDIA GPU (`--device cuda:0`).
+- **Patch Extraction**: 64x64x64 voxel sliding windows sampled centered around pulmonary vessel segments.
+- **Optimization**: AdamW optimizer with initial learning rate 1e-4 to 3e-4, cosine annealing scheduler, 50 epochs on NVIDIA GPU (`--device cuda:0`).
 - **Factory Implementation**: See [`src/models/volumetric_baselines.py`](../../src/models/volumetric_baselines.py).
 
 ---
@@ -28,15 +28,15 @@ All dense volumetric architectures are instantiated via **Project MONAI** (`mona
 
 All graph neural network baselines operate on the extracted pulmonary vascular skeleton graphs:
 
-| Model | Config File | Implementation Source | Citation | Key Hyperparameters |
+| Model | Config File | Implementation Source | Literature Reference | Key Hyperparameters |
 | :--- | :--- | :--- | :--- | :--- |
-| **GAT** | [`gnn_baselines.yaml`](gnn_baselines.yaml) | PyTorch Geometric (`torch_geometric.nn.GATConv`) | Veličković et al. (*ICLR 2018*) | 3 layers, 4 attention heads, hidden dim: 128, dropout: 0.1 |
-| **GraphSAGE** | [`gnn_baselines.yaml`](gnn_baselines.yaml) | PyTorch Geometric (`torch_geometric.nn.SAGEConv`) | Hamilton et al. (*NeurIPS 2017*) | 3 layers, mean neighborhood aggregator, hidden dim: 128 |
-| **Graph-PAVNet HGAT** | [`gnn_baselines.yaml`](gnn_baselines.yaml) | Custom reimplementation of Li et al. | Li et al. (*GitHub: Lqy1018/Graph-PAVNet*) | 3-hop multi-hop neighborhood aggregation, 584d visual-patch inputs |
+| **GAT** | [`gnn_baselines.yaml`](gnn_baselines.yaml) | [PyTorch Geometric](https://pyg.org/) (`torch_geometric.nn.GATConv`) | [Veličković et al. (ICLR 2018)](https://openreview.net/forum?id=rJXMpikCZ) | 3 layers, 4 attention heads, hidden dim: 128, dropout: 0.1 |
+| **GraphSAGE** | [`gnn_baselines.yaml`](gnn_baselines.yaml) | [PyTorch Geometric](https://pyg.org/) (`torch_geometric.nn.SAGEConv`) | [Hamilton et al. (NeurIPS 2017)](https://proceedings.neurips.cc/paper/2017/hash/5dd9db5e033da2115e84838ce79d3417-Abstract.html) | 3 layers, mean neighborhood aggregator, hidden dim: 128 |
+| **Graph-PAVNet HGAT** | [`gnn_baselines.yaml`](gnn_baselines.yaml) | Custom reimplementation of Li et al. | [Li et al. (MICCAI 2023)](https://doi.org/10.1007/978-3-032-05162-2_36) | 3-hop multi-hop neighborhood aggregation, 584d visual-patch inputs |
 
 ### Graph Training Details
 - **Loss Function**: Focal Dice + Cross-Entropy loss.
-- **Optimization**: AdamW, learning rate $\eta = 4 \times 10^{-4}$, weight decay $10^{-4}$, 50 epochs on NVIDIA GPU (`--device cuda:0`).
+- **Optimization**: AdamW, learning rate 4e-4, weight decay 1e-4, 50 epochs on NVIDIA GPU (`--device cuda:0`).
 - **Factory Implementation**: See [`src/models/gnn_baselines.py`](../../src/models/gnn_baselines.py) and [`src/models/baseline_hgat.py`](../../src/models/baseline_hgat.py).
 
 ---
@@ -45,13 +45,13 @@ All graph neural network baselines operate on the extracted pulmonary vascular s
 
 ### 3.1 Origin & Literature Reference
 - **Authors & Affiliation**: Qingya Li, Ye Yuan, Lu Liu, Nan Bao, Lisheng Xu, Wenjun Tan. Key Research Laboratory of Intelligent Computing of Medical Images, Northeastern University, Shenyang, China.
-- **Paper**: *Graph-PAVNet: A Graph-Based Learning Framework for Pulmonary Artery and Vein Separation Using Multimodal Feature Sampling*.
+- **Paper**: *Graph-PAVNet: A Graph-Based Learning Framework for Pulmonary Artery and Vein Separation Using Multimodal Feature Sampling* ([MICCAI 2023](https://doi.org/10.1007/978-3-032-05162-2_36) / [Open Access PDF](https://papers.miccai.org/miccai-2025/paper/3757_paper.pdf)).
 - **Upstream Repository**: [https://github.com/Lqy1018/Graph-PAVNet](https://github.com/Lqy1018/Graph-PAVNet)
 
 ### 3.2 Canonical Architecture (584-dim Input)
 Graph-PAVNet constructs a pulmonary vascular skeleton graph and represents each centerline node using 584 features:
-1. **Visual ViT Tokens ($576\text{d}$)**: Extracted from a $16 \times 16 \times 16$ voxel CT patch centered at each node using a frozen 3D Vision Transformer encoder.
-2. **Spatial & Geometric Features ($8\text{d}$)**: Normalized Cartesian coordinates $(x, y, z)$, vessel radius $r$, parent branch geodesic distance, and 3D directional vectors $(\Delta x, \Delta y, \Delta z)$.
+1. **Visual ViT Tokens (576d)**: Extracted from a 16x16x16 voxel CT patch centered at each node using a frozen 3D Vision Transformer encoder.
+2. **Spatial & Geometric Features (8d)**: Normalized Cartesian coordinates (x, y, z), vessel radius r, parent branch geodesic distance, and 3D directional vectors (dx, dy, dz).
 3. **Hierarchical Graph Attention Network (HGAT)**: Aggregates information across 3 hierarchy hops from the hilum seed nodes using attention coefficients and residual gating.
 
 ### 3.3 How to Set Up & Run Graph-PAVNet

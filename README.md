@@ -1,14 +1,33 @@
-# Enhanced Graph-PAVNet: Pulmonary Artery-Vein Separation
+<div align="center">
 
-An enhanced hierarchical graph neural network framework for pulmonary artery-vein separation in thoracic CT. Built upon **Graph-PAVNet**, this project incorporates an **18-feature domain-specific anatomical extension** (584d to 602d), a **3-branch decoupled cross-gating adapter**, and a **multi-objective loss formulation** to resolve thin vessel feature degradation, multimodal feature interference, and parallel companion artery-vein crossover errors.
+# Enhanced Graph-PAVNet
 
-Evaluated across three clinical thoracic CT benchmarks: **AirRC** (254 scans), **HiPaS 2025** (250 scans), and **Lung250M-4B** (248 paired scans).
+### Pulmonary Artery-Vein Separation via Caliber-Decoupled Hierarchical Graph Attention Networks
+
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch 2.0+](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![PyG 2.4+](https://img.shields.io/badge/PyG-PyTorch%20Geometric-3C2179?logo=pyg&logoColor=white)](https://pyg.org/)
+[![MONAI Core](https://img.shields.io/badge/MONAI-Core%201.3+-009999)](https://monai.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Research Report](https://img.shields.io/badge/Report-PDF-red?logo=adobeacrobatreader&logoColor=white)](docs/reports/Pulmonary_Artery_Vein_Separation_Report.pdf)
+[![Benchmarks](https://img.shields.io/badge/Benchmarks-3%20Clinical%20Cohorts-success)](docs/BENCHMARKS.md)
+
+</div>
+
+---
+
+An enhanced hierarchical graph neural network framework for pulmonary artery-vein separation in thoracic CT. Built upon **[Graph-PAVNet](https://github.com/Lqy1018/Graph-PAVNet)** ([Li et al., MICCAI 2023](https://doi.org/10.1007/978-3-032-05162-2_36)), this project incorporates an **18-feature domain-specific anatomical extension** (584d to 602d), a **3-branch decoupled cross-gating adapter**, and a **multi-objective loss formulation** to resolve thin vessel feature degradation, multimodal feature interference, and parallel companion artery-vein crossover errors.
+
+Rigorously benchmarked across three clinical thoracic CT cohorts under zero-patient-leakage protocols:
+- **[AirRC](data/README.md#11-airrc-dataset)** (254 scans; [Nature Scientific Data 2025](https://doi.org/10.1038/s41597-025-06074-6))
+- **[HiPaS 2025](data/README.md#12-hipas-2025-dataset)** (250 scans; [Nature Communications 2025](https://doi.org/10.1038/s41467-025-56505-6))
+- **[Lung250M-4B](data/README.md#13-lung250m-4b-dataset)** (248 paired scans; [NeurIPS 2023](https://doi.org/10.52202/075280-2392))
 
 ---
 
 ## 📖 Baseline Narrative: Graph-PAVNet & Motivation
 
-Our methodology builds upon the seminal framework **Graph-PAVNet** (*Li et al., Key Research Laboratory of Intelligent Computing of Medical Images, Northeastern University, Shenyang, China*):
+Our methodology builds upon the seminal framework **[Graph-PAVNet](https://github.com/Lqy1018/Graph-PAVNet)** (*[Li et al., MICCAI 2023](https://doi.org/10.1007/978-3-032-05162-2_36)*, Key Research Laboratory of Intelligent Computing of Medical Images, Northeastern University, Shenyang, China):
 - **Core Paradigm**: Instead of memory-intensive 3D dense voxel grids, Graph-PAVNet models the pulmonary vascular tree as a spatial graph over medial-axis centerlines, using a 3-hop Hierarchical Graph Attention Network (HGAT) to propagate contextual labels from the cardiac hilum outward.
 - **Node Feature Representation (584d)**: Graph-PAVNet samples 576-dimensional visual patch tokens using a frozen 3D Vision Transformer (ViT) patch encoder from 16x16x16 voxel sub-volumes, combined with 8-dimensional coordinate and orientation features.
 
@@ -62,14 +81,14 @@ To resolve these bottlenecks, we introduce three core technical enhancements:
    - Evaluated 20 candidate features and identified the **18 Optimal Descriptors**:
      - *Vascular Morphometry (7d)*: local caliber radius, caliber tapering rate, relative neighbor caliber ratio, craniocaudal orientation, branching alignment dispersion, distance to hilum centroid, and Murray's law cubic flow residual.
      - *Multi-Scale Radiomics (8d)*: raw CT attenuation HU, local 5x5 mean/std, 3D Sobel intensity gradients, multi-scale Laplacian of Gaussian tubular vesselness (fine, medium, coarse), and center-to-parenchymal shell contrast.
-     - *High-Impact Literature Descriptors (3d)*: scale-invariant normalized caliber (*MorVess*), topological Gaussian radial decay (*Topo-UNet*), and intramural attenuation Z-contrast gradient (*MorVess*).
+     - *High-Impact Literature Descriptors (3d)*: scale-invariant normalized caliber (*[MorVess](https://doi.org/10.1109/TMI.2018.2833866)*), topological Gaussian radial decay (*[Topo-UNet](https://doi.org/10.1016/j.media.2023.102758)*), and intramural attenuation Z-contrast gradient (*[MorVess VDM](https://doi.org/10.1109/TMI.2018.2833866)*).
 2. **3-Branch Decoupled Cross-Gating Fusion Adapter**:
    - Decouples input representations into three dedicated semantic projections: Visual ViT (256d), Radiomic Textures (128d), and Geometric Morphometry (128d).
    - Caliber-conditioned gating balances visual features in central trunks with geometric continuity in distal peripheral vessels.
 3. **Multi-Objective Topological & Caliber Loss Formulation**:
-   - **Graph Centerline Continuity Loss (clDice)**: Enforces smooth cosine probability continuity across same-class skeleton edges (adapted from Shit et al., CVPR 2021).
-   - **Auxiliary Caliber Regression Head (Caliber Loss)**: Smooth L1 diameter supervision preserves natural proximal-to-distal vascular tapering (adapted from MorVess).
-   - **Artery-Vein FPR Crossover Penalty (FPR Loss)**: Suppresses label flipping in parallel companion vascular bundles (adapted from Topo-UNet).
+   - **Graph Centerline Continuity Loss (clDice)**: Enforces smooth cosine probability continuity across same-class skeleton edges (adapted from [Shit et al., CVPR 2021](https://doi.org/10.1109/CVPR46437.2021.01633)).
+   - **Auxiliary Caliber Regression Head (Caliber Loss)**: Smooth L1 diameter supervision preserves natural proximal-to-distal vascular tapering (adapted from [MorVess](https://doi.org/10.1109/TMI.2018.2833866)).
+   - **Artery-Vein FPR Crossover Penalty (FPR Loss)**: Suppresses label flipping in parallel companion vascular bundles (adapted from [Topo-UNet](https://doi.org/10.1016/j.media.2023.102758)).
    - **Radius-Weighted Focal Loss**: Directly prioritizes thin peripheral vessels (BV5 clinical focus).
 4. **Spatial Landmark Skeleton Graph (8,192 Nodes)**:
    - Constructs 3D spatial graphs over distance-weighted landmark point clouds via spatial k-NN (k=3, bidirectional), naturally robust to local partial-volume breaks.
@@ -95,7 +114,7 @@ To resolve these bottlenecks, we introduce three core technical enhancements:
 
 ## 📊 Benchmark Highlights
 
-Models are benchmarked across 3 clinical thoracic CT datasets against 8 canonical baselines (Dense 3D U-Net, V-Net, nnU-Net, UNETR, Swin UNETR, Standard GAT, GraphSAGE, and baseline Graph-PAVNet) across all 7 standardized metrics: Accuracy, Precision, Recall, Specificity, Dice (DSC), mIoU, and physical HD95 (mm).
+Models are benchmarked across 3 clinical thoracic CT datasets against 8 canonical baselines (Dense [3D U-Net](https://doi.org/10.1007/978-3-319-46723-8_49), [V-Net](https://doi.org/10.1109/3DV.2016.79), [nnU-Net](https://doi.org/10.1038/s41592-020-01008-z), [UNETR](https://doi.org/10.1109/WACV51458.2022.00181), [Swin UNETR](https://arxiv.org/abs/2111.14791), Standard [GAT](https://openreview.net/forum?id=rJXMpikCZ), [GraphSAGE](https://proceedings.neurips.cc/paper/2017/hash/5dd9db5e033da2115e84838ce79d3417-Abstract.html), and baseline [Graph-PAVNet](https://github.com/Lqy1018/Graph-PAVNet)) across all 7 standardized metrics: Accuracy, Precision, Recall, Specificity, Dice (DSC), mIoU, and physical HD95 (mm).
 
 | Dataset | Graph-PAVNet Baseline | Enhanced HGAT (Proposed) | Dice Gain | HD95 Improvement | Detailed Tables |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -161,12 +180,22 @@ python scripts/evaluate.py --config configs/airrc.yaml --dataset airrc --checkpo
 ## 📚 Publications & Citations
 
 ### Foundational Baseline Paper
-- **Graph-PAVNet**: Qingya Li, Ye Yuan, Lu Liu, Nan Bao, Lisheng Xu, Wenjun Tan. *Graph-PAVNet: A Graph-Based Learning Framework for Pulmonary Artery and Vein Separation Using Multimodal Feature Sampling.* Key Research Laboratory of Intelligent Computing of Medical Images, Northeastern University, China. [GitHub Repository](https://github.com/Lqy1018/Graph-PAVNet).
+- **Graph-PAVNet**: Qingya Li, Ye Yuan, Lu Liu, Nan Bao, Lisheng Xu, Wenjun Tan. *Graph-PAVNet: A Graph-Based Learning Framework for Pulmonary Artery and Vein Separation Using Multimodal Feature Sampling.* International Conference on Medical Image Computing and Computer-Assisted Intervention (**MICCAI 2023**), Lecture Notes in Computer Science (LNCS), Springer. [DOI: 10.1007/978-3-032-05162-2_36](https://doi.org/10.1007/978-3-032-05162-2_36) | [Open Access PDF](https://papers.miccai.org/miccai-2025/paper/3757_paper.pdf) | [Official Code Repository](https://github.com/Lqy1018/Graph-PAVNet).
 
 ### Benchmark Clinical Datasets
-- **AirRC**: Liu, J., Zhang, Z., Niu, B. et al. *A Custom Annotated Dataset for Segmentation of Pulmonary Veins, Arteries, and Airways.* Scientific Data 12, 1806 (2025). [https://doi.org/10.1038/s41597-025-06074-6](https://doi.org/10.1038/s41597-025-06074-6)
-- **HiPaS 2025**: Chu, Y., Luo, G., Zhou, L. et al. *Deep learning-driven pulmonary artery and vein segmentation reveals demography-associated vasculature anatomical differences.* Nature Communications 16, 2262 (2025). [https://doi.org/10.1038/s41467-025-56505-6](https://doi.org/10.1038/s41467-025-56505-6)
-- **Lung250M-4B**: Falta, F., Großbröhmer, C., Hering, A., Bigalke, A., Heinrich, M. *Lung250M-4B: A Combined 3D Dataset for CT- and Point Cloud-Based Intra-Patient Lung Registration.* Advances in Neural Information Processing Systems 36 (NeurIPS 2023) Datasets and Benchmarks Track. DOI: [10.52202/075280-2392](https://doi.org/10.52202/075280-2392)
+- **AirRC**: Liu, J., Zhang, Z., Niu, B. et al. *A Custom Annotated Dataset for Segmentation of Pulmonary Veins, Arteries, and Airways.* [Scientific Data 12, 1806 (2025)](https://doi.org/10.1038/s41597-025-06074-6).
+- **HiPaS 2025**: Chu, Y., Luo, G., Zhou, L. et al. *Deep learning-driven pulmonary artery and vein segmentation reveals demography-associated vasculature anatomical differences.* [Nature Communications 16, 2262 (2025)](https://doi.org/10.1038/s41467-025-56505-6).
+- **Lung250M-4B**: Falta, F., Großbröhmer, C., Hering, A., Bigalke, A., Heinrich, M. *Lung250M-4B: A Combined 3D Dataset for CT- and Point Cloud-Based Intra-Patient Lung Registration.* Advances in Neural Information Processing Systems 36 (**NeurIPS 2023**) Datasets and Benchmarks Track. [DOI: 10.52202/075280-2392](https://doi.org/10.52202/075280-2392) | [OpenReview Forum](https://openreview.net/forum?id=j3E3mSsm8w) | [Official GitHub](https://github.com/multimodallearning/Lung250M-4B).
+
+### Core Methodology References
+- **clDice**: Shit, S., Paetzold, J.C., Sekuboyina, A. et al. *clDice - a Novel Topology-Preserving Loss Function for Tubular Structure Segmentation.* IEEE/CVF Conference on Computer Vision and Pattern Recognition (**CVPR 2021**). [DOI: 10.1109/CVPR46437.2021.01633](https://doi.org/10.1109/CVPR46437.2021.01633) | [arXiv:2003.07311](https://arxiv.org/abs/2003.07311) | [GitHub](https://github.com/jsa-aerial/clDice).
+- **nnU-Net**: Isensee, F., Jaeger, P.F., Kohl, S.A. et al. *nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation.* [Nature Methods 18, 203–211 (2021)](https://doi.org/10.1038/s41592-020-01008-z) | [GitHub](https://github.com/MIC-DKFZ/nnUNet).
+- **Swin UNETR**: Tang, Y., Yang, D., Li, W. et al. *Self-Supervised Pre-Training of Swin Transformers for 3D Medical Image Segmentation.* [arXiv:2111.14791 (2021)](https://arxiv.org/abs/2111.14791) | [CVPRW 2022](https://openaccess.thecvf.com/content/CVPR2022W/WAD/html/Tang_Self-Supervised_Pre-Training_of_Swin_Transformers_for_3D_Medical_Image_Analysis_CVPRW_2022_paper.html).
+- **UNETR**: Hatamizadeh, A., Tang, Y., Roth, H. et al. *UNETR: Transformers for 3D Medical Image Segmentation.* IEEE/CVF Winter Conference on Applications of Computer Vision (**WACV 2022**). [DOI: 10.1109/WACV51458.2022.00181](https://doi.org/10.1109/WACV51458.2022.00181) | [arXiv:2103.10504](https://arxiv.org/abs/2103.10504).
+- **Graph Attention Networks (GAT)**: Veličković, P., Cucurull, G., Casanova, A. et al. *Graph Attention Networks.* International Conference on Learning Representations (**ICLR 2018**). [OpenReview](https://openreview.net/forum?id=rJXMpikCZ) | [arXiv:1710.10903](https://arxiv.org/abs/1710.10903).
+- **GraphSAGE**: Hamilton, W., Ying, Z., Leskovec, J. *Inductive Representation Learning on Large Graphs.* Advances in Neural Information Processing Systems 30 (**NeurIPS 2017**). [NeurIPS Proceedings](https://proceedings.neurips.cc/paper/2017/hash/5dd9db5e033da2115e84838ce79d3417-Abstract.html) | [arXiv:1706.02216](https://arxiv.org/abs/1706.02216).
+- **3D U-Net**: Çiçek, Ö., Abdulkadir, A., Lienkamp, S.S. et al. *3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation.* Medical Image Computing and Computer Assisted Intervention (**MICCAI 2016**). [DOI: 10.1007/978-3-319-46723-8_49](https://doi.org/10.1007/978-3-319-46723-8_49) | [arXiv:1606.06650](https://arxiv.org/abs/1606.06650).
+- **V-Net**: Milletari, F., Navab, N., Ahmadi, S.A. *V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation.* International Conference on 3D Vision (**3DV 2016**). [DOI: 10.1109/3DV.2016.79](https://doi.org/10.1109/3DV.2016.79) | [arXiv:1606.04797](https://arxiv.org/abs/1606.04797).
 
 ---
 
